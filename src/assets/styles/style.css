@@ -1,0 +1,124 @@
+body {
+    margin: 0;
+    background: #0a0d12;
+    color: #fff;
+    font-family: Inter, "Segoe UI", sans-serif;
+}
+
+#app {
+    width: 650px;
+    margin: 30px;
+    border: 2px solid #666;
+    border-radius: 16px;
+    background: #0e1218;
+    position: relative;
+    overflow: hidden;
+}
+
+.window-bar { 
+    padding: 12px;
+    border-bottom: 1px solid #444;
+    font-size:18px;
+    font-weight:600;
+}
+
+.container {
+    margin: 30px;
+    color:#d0d0d0;
+}
+
+.question {
+    text-align: center;
+    font-size: 15px;
+}
+
+.hero {
+    margin-top: 30px;
+    display: flex;
+    align-items: center; /* centraliza verticalmente */
+    gap: 24px;           /* espaço entre as divs */
+}
+
+.album {
+    flex-shrink: 0;      /* impede a imagem de encolher */
+}
+
+.album img {
+    width: 180px;
+    display: block;
+    border-radius: 12px;
+}
+
+.info {
+    flex: 1;             /* ocupa o restante da largura */
+}
+
+.music-title{
+    font-size:44px;
+    line-height:1.1;
+    margin:0;
+    color:white;
+}
+
+.info h2{
+    font-size:28px;
+    margin-top:12px;
+    color:#b69cff;
+    font-weight:500;
+}
+
+.badge {
+    display: inline-block;
+    border: 1px solid #78ff4d;
+    padding: 8px 14px;
+    color: #78ff4d
+}
+
+.section-title{
+    font-size:26px;
+    font-weight:700;
+    color:white;
+}
+
+.section-title span:first-child{
+    font-size:30px;
+    margin-right:8px;
+}
+
+p{
+    font-size:22px;
+    line-height:1.6;
+    color:#d0d0d0;
+}
+
+footer {
+    padding: 20px;
+    border-top: 1px solid #444;
+    color: #78ff4d
+}
+
+.footer-list {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-list li {
+    color: #9ca3af;
+}
+
+.footer-list li:not(:last-child)::after {
+    content: ".";
+    color: #22c55e;
+    margin-left: 16px;
+    font-weight: bold;
+}
+
+.separator{
+    height:1px;
+    background:#222;
+    margin:28px 0;
+}
