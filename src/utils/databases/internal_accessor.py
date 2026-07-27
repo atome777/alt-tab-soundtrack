@@ -1,54 +1,101 @@
-from typing import Self, Dict, Any
+import logging
+from typing import Self, Unpack
 
-from src.core.database.collector_sqlite3 import CollectorSqlite3
+from src.cores.database.async_collector_sqlite import AsyncCollectorSqlite
+from src.types.ui.html_data import HtmlData
 
 
-class InternalGetter(CollectorSqlite3):
+class InternalAccessor(AsyncCollectorSqlite):
 
     def __init__(self: Self) -> None:
-        super().__init__()
+        self.file_database = "internal.db"
+        super().__init__(self.file_database, True)
 
-    def __del__(self: Self) -> None:
-        super().__del__()
 
-    def set_af(self: Self, **kwargs: Dict[str, Any]) -> int | Any:
-        uuid = kwargs.get("user", {}).get("uuid")
-        cpf = kwargs.get("user", {}).get("cpf")
-        if kwargs.get("daemon", {}) is not None:
-            af_codigo = kwargs.get("daemon", {}).get("codigo_af")
-        else:
-            af_codigo = None
-        if uuid:
-            upsert = "INSERT OR REPLACE INTO redux (uuid, cpf_representante, af_codigo) VALUES (?, ?, ?);"
-            parameters = (uuid, cpf, af_codigo)
+    async def insert_post(self: Self, **kwargs: Unpack[HtmlData]):
+        try:
+            await self.connect()
+            if self.connection:
 
-            return self.insert(upsert, parameters)
+                link_spotify = kwargs.get("link_spotify")
+                edition_number = kwargs.get("edition_number")
+                music_title = kwargs.get("music_title")
+                music_artist = kwargs.get("music_artist")
+                link_album = kwargs.get("link_album")
+                situation_title = kwargs.get("situation_title")
+                situation = kwargs.get("situation")
+                curiosity_title = kwargs.get("curiosity_title")
+                curiosity = kwargs.get("curiosity")
+                question_title = kwargs.get("question_title")
+                question = kwargs.get("question")
+                post_date = kwargs.get("post_date")
+                post_hour = kwargs.get("post_hour")
 
-    def delete_af(self: Self, **kwargs: Dict[str, Any]):
-        if kwargs.get("user") is not None:
-            uuid = uuid = kwargs.get("user", {}).get("uuid")
-            cpf = kwargs.get("user", {}).get("cpf")
+                insert = """
+                    INSERT INTO posts
+                    (
+                        link_spotify,
+                        edition_number,
+                        music_title,
+                        music_artist,
+                        link_album,
+                        situation_title,
+                        situation,
+                        curiosity_title,
+                        curiosity,
+                        question_title,
+                        question,
+                        post_date,
+                        post_hour
+                    )
+                    VALUES
+                    (
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    )
+                """
+                parameters = (
+                    link_spotify,
+                    edition_number,
+                    music_title,
+                    music_artist,
+                    link_album,
+                    situation_title,
+                    situation,
+                    curiosity_title,
+                    curiosity,
+                    question_title,
+                    question,
+                    post_date,
+                    post_hour,
+                )
 
-            delete = "DELETE FROM redux where uuid = ? and cpf_representante = ?"
-            parameters = (uuid, cpf)
+                return await self.insert(insert, parameters)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error(
+                "InternalAccessor.insert_post error::%s", str(error)
+            )
+        finally:
+            await self.close()
 
-            return self.delete(delete, parameters)
 
-    def get_af(self: Self, **kwargs: Dict[str, Any]):
-        if kwargs.get("user", {}) is not None:
-            uuid = kwargs.get("user", {}).get("uuid")
-            cpf = kwargs.get("user", {}).get("cpf")
+    async def get_last_post(self: Self, ):
+        try:
+            await self.connect()
+            if self.connection:
+                select = """
+                    SELECT
+                        *
+                    FROM posts
+                    ORDER BY
+                        edition_number DESC
+                    LIMIT
+                        1;
+                """
+                return await self.get_one(select)
 
-            select = "SELECT * FROM redux where uuid = ? and cpf_representante = ?"
-            parameters = (uuid, cpf)
-
-            return self.get_one(select, parameters)
-        
-    def is_typping(self: Self, code_af: int):
-        select = "SELECT * FROM redux WHERE af_codigo = ?"
-        parameters = (code_af, )
-        return self.get_one(select, parameters)
-        
-    def flush_af(self: Self):
-        delete = "DELETE FROM redux"
-        self.delete(delete)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error(
+                "InternalAccessor.get_last_post error::%s", str(error)
+            )
+        finally:
+            await self.close()
