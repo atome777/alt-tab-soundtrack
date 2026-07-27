@@ -1,7 +1,10 @@
+.gitignore
 .env
-__pycache__/
-.vscode/
-.venv/
+
 *.db
 *.log
+
+__pycache__/
 output/
+.vscode/
+.venv/

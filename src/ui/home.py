@@ -4,8 +4,8 @@ import customtkinter as ctk
 import tkinter as tk
 import logging
 import os
+import time
 
-from datetime import datetime
 from tkinter import messagebox
 from typing import Self, Tuple
 
@@ -17,9 +17,10 @@ from src.utils.globals.html_generator import html_generator
 from src.utils.sites.linkedin import Linkedin
 from src.utils.sites.post_image import PostImage
 from src.utils.sites.spotfy import Spotfy
-from src.types.ui.html_data import HtmlData
 from src.utils.browsers.browser_playwright import BrowserPlaywright
 from src.utils.browsers.engines import Engines
+from src.types.ui.html_data import HtmlData
+from src.services.database.internal import Internal
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -36,7 +37,7 @@ class App(ctk.CTk):
         self.page = None
 
         self.loop = loop
-        self.start()
+        self.start_browser()
 
         self.title("ALT+TAB Soundtrack")
         self.geometry("1100x750")
@@ -51,15 +52,20 @@ class App(ctk.CTk):
         self.create_preview()
 
         self.link_album = None
+        self.preview_photo = None
+
+        self.load_data()
 
 
-    def start(self: Self):
+    def start_browser(self: Self):
         self.execute_async(
             self.create_page(),
         )
+        time.sleep(15)
 
 
     async def create_page(self: Self) -> Page:
+        logging.info("Iniciando browser")
         self.page = await self.browser.create_page(Engines.MSEDGE, self.path_storage)
 
 
@@ -84,13 +90,13 @@ class App(ctk.CTk):
         ctk.CTkLabel(frame, text="Link do Spotify").pack(anchor="w")
 
         self.link_spotify = ctk.CTkEntry(frame, width=500)
-        self.link_spotify.insert(0, "https://open.spotify.com/intl-pt/track/57iDDD9N9tTWe75x6qhStw")
+        self.link_spotify.insert(0, "")
         self.link_spotify.pack(fill="x")
 
         ctk.CTkLabel(frame, text="Número da edição").pack(anchor="w")
 
         self.edition_number = ctk.CTkEntry(frame)
-        self.edition_number.insert(0, "003")
+        self.edition_number.insert(0, "")
         self.edition_number.pack(fill="x")
 
         # song_frame
@@ -110,8 +116,8 @@ class App(ctk.CTk):
         # Coluna 2
         ctk.CTkLabel(song_frame, text="Artista").grid(row=0, column=1, sticky="w")
 
-        self.muscic_artist = ctk.CTkEntry(song_frame)
-        self.muscic_artist.grid(row=1, column=1, sticky="ew", padx=(5, 0))
+        self.music_artist = ctk.CTkEntry(song_frame)
+        self.music_artist.grid(row=1, column=1, sticky="ew", padx=(5, 0))
         # song_frame
 
         # situation_frame
@@ -129,17 +135,18 @@ class App(ctk.CTk):
         self.situation_title = ctk.CTkComboBox(
             situation_frame,
             values=[
+                "",
                 "Você está no trabalho e, de repente...",
+                "Ao finalizar aquela tarefa impossível..."
             ],
             # command=mudou
         )
         self.situation_title.grid(row=0, column=1, sticky="ew", padx=(5, 0))
 
         self.situation = ctk.CTkTextbox(frame, height=80)
-        self.situation.insert(0.0, "Consegue resolver um problema ... e aparecem outros três.")
+        self.situation.insert(0.0, "")
         self.situation.pack(fill="x")
         # situation_frame
-
 
         # curiosity_frame
         curiosity_frame = ctk.CTkFrame(frame)
@@ -162,7 +169,7 @@ class App(ctk.CTk):
         self.curiosity_title.grid(row=0, column=1, sticky="ew", padx=(5, 0))
 
         self.curiosity = ctk.CTkTextbox(frame, height=80)
-        self.curiosity.insert(0.0, '"Bitter Sweet Symphony" ficou marcada pelo final do filme Segundas Intenções e transmite exatamente essa sensação: algumas vitórias vêm acompanhadas de novos desafios.')
+        self.curiosity.insert(0.0, "")
         self.curiosity.pack(fill="x")
         # curiosity_frame
 
@@ -187,24 +194,29 @@ class App(ctk.CTk):
         self.question_title.grid(row=0, column=1, sticky="ew", padx=(5, 0))
 
         self.question = ctk.CTkTextbox(frame, height=80)
-        self.question.insert(0.0, "Qual música faz você pensar que finalmente deu tudo certo... até abrir o próximo e-mail?")
-        self.question.pack(fill="x", pady=(0, 20))
+        self.question.insert(0.0, "")
+        self.question.pack(fill="x", pady=(0, 1))
         # question_frame
 
         # post_date_frame
-        entry_frame = ctk.CTkEntry(frame, placeholder_text="DD/MM/AAAA")
-        entry_frame.pack(padx=20, pady=20)
+        post_date_frame = ctk.CTkFrame(frame)
+        post_date_frame.pack(fill="x", pady=20)
 
-        def validar():
-            texto = entry_frame.get()
-            try:
-                datetime.strptime(texto, "%d/%m/%Y")
-                print("Data válida")
-            except ValueError:
-                print("Data inválida")
+        post_date_frame.grid_columnconfigure(0, weight=2)
+        post_date_frame.grid_columnconfigure(1, weight=8)
 
-        botao = ctk.CTkButton(frame, text="Validar", command=validar)
-        botao.pack()
+        # Coluna 1
+        ctk.CTkLabel(post_date_frame, text="Data da Postagem").grid(row=0, column=0, padx=(5, 0))
+        self.date = ctk.CTkEntry(post_date_frame, placeholder_text="DD/MM/AAAA")
+        self.date.insert(0, "27/07/2026")
+        self.date.grid(row=1, column=0, padx=(5, 0))
+
+        # Coluna 2
+        ctk.CTkLabel(post_date_frame, text="Hora da Postagem").grid(row=0, column=1, padx=(5, 0))
+        self.hour = ctk.CTkEntry(post_date_frame, placeholder_text="HH:MM")
+        self.hour.insert(0, "03:33")
+        self.hour.grid(row=1, column=1, padx=(5, 0))
+
         # post_date_frame
 
         buttons = ctk.CTkFrame(frame)
@@ -219,18 +231,20 @@ class App(ctk.CTk):
 
         self.button_post_linkedin = ctk.CTkButton(
             buttons,
+            state="disabled",
             text="Postar Linkedin",
             command=self.run_post_linkedin
         )
+
         self.button_post_linkedin.pack(side="left", padx=5)
 
 
-    def clear_preview(self):
+    def clear_preview(self: Self):
         self.preview_canvas.delete("all")
         self.preview_photo = None
 
 
-    def create_preview(self):
+    def create_preview(self: Self):
         self.preview_frame = ctk.CTkFrame(self)
         self.preview_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
         self.preview_frame.grid_rowconfigure(1, weight=1)
@@ -261,7 +275,7 @@ class App(ctk.CTk):
                         0,
                         lambda: on_success(result)
                     )
-            except Exception as e:
+            except Exception as e: # pylint: disable=broad-exception-caught
                 if on_error:
                     self.after(
                         0,
@@ -270,56 +284,78 @@ class App(ctk.CTk):
         future.add_done_callback(callback)
 
 
-    async def create_html(self: Self):
-        data: HtmlData = {
+    async def get_form_data(self: Self) -> HtmlData:
+        return {
             "link_spotify": self.link_spotify.get(),
             "edition_number": self.edition_number.get(),
             "music_title": self.music_title.get(),
-            "muscic_artist": self.muscic_artist.get(),
+            "music_artist": self.music_artist.get(),
             "link_album": self.link_album,
             "situation_title": self.situation_title.get(),
             "situation": self.situation.get("0.0", "end"),
             "curiosity_title": self.curiosity_title.get(),
             "curiosity": self.curiosity.get("0.0", "end"),
             "question_title": self.question_title.get(),
-            "question": self.question.get("0.0", "end")
+            "question": self.question.get("0.0", "end"),
+            "post_date": self.date.get(),
+            "post_hour": self.hour.get(),
         }
+
+
+    async def create_html(self: Self):
+        data: HtmlData = await self.get_form_data()
         file_path = await html_generator(data)
         logging.info("HTML gerado: %s", file_path)
 
 
-    def run_process(self):
+    async def save_database(self: Self):
+        data: HtmlData = await self.get_form_data()
+        id_post = await Internal().insert_post(**data)
+        logging.info("Post salvo no banco de dados com o id: %s", id_post)
+
+
+    def run_process(self: Self):
         self.execute_async(
             self.process(),
         )
 
+
     def run_post_linkedin(self: Self):
+        logging.info("Postando linkedin")
         self.execute_async(
             self.post_linkedin(),
         )
 
+
     async def process(self: Self):
-        self.clear_preview()
+        try:
+            self.clear_preview()
 
-        self.edit_button_label("disabled", "Buscando Spotify...")
-        link = self.link_spotify.get()
-        data = await self.get_spotify(link)
-        self.update_spotify(data)
+            self.edit_button_label("disabled", "Buscando Spotify...")
+            link = self.link_spotify.get()
+            data = await self.get_spotify(link)
+            self.update_spotify(data)
 
-        self.edit_button_label("disabled", "Criando html...")
-        await self.create_html()
+            self.edit_button_label("disabled", "Criando html...")
+            await self.create_html()
 
-        self.edit_button_label("disabled", "Tirando print da tela...")
-        await self.get_image()
+            self.edit_button_label("disabled", "Salvando banco de dados...")
+            await self.save_database()
 
-        self.edit_button_label("disabled", "Mostrando imagem...")
-        await self.update_preview("post.png")
+            self.edit_button_label("disabled", "Tirando print da tela...")
+            await self.get_image()
 
-        self.edit_button_label("enabled", "Gerar HTML")
-        messagebox.showinfo("Sucesso", "Operação concluída!")
+            self.edit_button_label("disabled", "Mostrando imagem...")
+            await self.update_preview("post.png")
+
+            self.edit_button_label("enabled", "Gerar HTML")
+            self.edit_button_post_linkedin("enabled", "Postar Linkedin")
+            messagebox.showinfo("Sucesso", "Operação concluída!")
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("App.process error: %s", error)
 
 
-    async def get_spotify(self, link) -> Tuple[str, str, str]:
+    async def get_spotify(self: Self, link: str) -> Tuple[str, str, str]:
         spotify = Spotfy(self.page)
         await spotify.go_to_page(link)
         title = await spotify.get_music_title()
@@ -328,17 +364,24 @@ class App(ctk.CTk):
         return title, artist, link_album
 
 
-    def update_spotify(self, data):
-        music_title, muscic_artist, link_album = data
+    def update_spotify(self: Self, data: Tuple[str, str, str]):
+        music_title, music_artist, link_album = data
         self.link_album = link_album
         self.music_title.delete(0, "end")
         self.music_title.insert(0, music_title)
-        self.muscic_artist.delete(0, "end")
-        self.muscic_artist.insert(0, muscic_artist)
+        self.music_artist.delete(0, "end")
+        self.music_artist.insert(0, music_artist)
 
 
     def edit_button_label(self: Self, state: str, text: str):
         self.button_start.configure(
+            state=state,
+            text=text
+        )
+
+
+    def edit_button_post_linkedin(self: Self, state: str, text: str):
+        self.button_post_linkedin.configure(
             state=state,
             text=text
         )
@@ -379,21 +422,53 @@ class App(ctk.CTk):
 
 
     async def post_linkedin(self: Self):
+        self.edit_button_post_linkedin("disabled", "Postando...")
         link = "https://www.linkedin.com/"
         linkedin = Linkedin(self.page)
         path = get_app_path(2, "/output/post.png")
 
+        date = self.date.get()
+        hour = self.hour.get()
+
         if os.path.exists(path):
 
-            await linkedin.go_to_page(link, wait_time=15)
+            await linkedin.go_to_page(url=link, force=True, wait_time=15)
 
             if not await linkedin.is_logged(os.getenv("LINKEDIN_NAME")):
                 await linkedin.insert_email(os.getenv("LINKEDIN_USER"))
                 await linkedin.insert_password(os.getenv("LINKEDIN_PASSWORD"))
                 await linkedin.click_access()
-                await asyncio.sleep(30)
+                await asyncio.sleep(20)
                 await self.browser.save_storage(self.path_storage)
 
             await linkedin.send_image(path)
+            await linkedin.click_advance(1)
+
+            await linkedin.click_schedule_post()
+            await linkedin.insert_date(date)
+            await linkedin.insert_hour(hour, 3)
+            await linkedin.click_schedule_advance(1)
+            await linkedin.click_schedule_advance(1)
+            await linkedin.insert_publication_text(self.link_spotify.get())
+            await linkedin.click_schedule()
+
+
         else:
             messagebox.showerror ("Erro", "Arquivo não criado para postagem.")
+        self.edit_button_post_linkedin("enabled", "Postar Linkedin")
+
+
+    def load_data(self: Self):
+        logging.info("Carregando dados do banco de dados, ultima postagem")
+        self.execute_async(
+            self.load_last_post(),
+        )
+
+
+    async def load_last_post(self: Self):
+        last_post: HtmlData = await Internal().get_last_post()
+        edition_number = last_post.get("edition_number") + 1
+        self.edition_number.insert(0, str(edition_number))
+        self.edition_number.configure(
+            state="disabled",
+        )

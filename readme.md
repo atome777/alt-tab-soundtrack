@@ -35,7 +35,7 @@ O projeto permite gerar imagens do post, organizar os dados das músicas e publi
 
 ## 🛠️ Tecnologias
 
-- Python 3.12+
+- Python 3.13+
 - CustomTkinter
 - Playwright
 - aiosqlite

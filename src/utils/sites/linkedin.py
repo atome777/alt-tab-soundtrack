@@ -29,7 +29,7 @@ class Linkedin(Site):
             await email_locator.press("Control+A")
             await email_locator.type(email)
             await asyncio.sleep(wait_time)
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-exception-caught
             logging.error("%s::%s",type(e), str(e))
 
 
@@ -43,14 +43,14 @@ class Linkedin(Site):
             await password_locator.focus()
             await password_locator.type(password)
             await asyncio.sleep(wait_time)
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-exception-caught
             logging.error("%s::%s",type(e), str(e))
 
     async def click_access(self: Self, wait_time: int = 0):
         try:
             await self.page.get_by_role("button", name="Entrar", exact=True).click()
             await asyncio.sleep(wait_time)
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-exception-caught
             logging.error("%s::%s",type(e), str(e))
 
 
@@ -60,7 +60,7 @@ class Linkedin(Site):
                 name,
                 exact=True
             ).is_visible()
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-exception-caught
             logging.error("%s::%s",type(e), str(e))
 
             
@@ -71,5 +71,77 @@ class Linkedin(Site):
             file_chooser = await fc_info.value
             await file_chooser.set_files(path)
             await asyncio.sleep(wait_time)
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-exception-caught
             logging.error("%s::%s",type(e), str(e))
+
+
+    async def click_advance(self: Self, wait_time: int = 0):
+        try:
+            dialog = self.page.get_by_role("dialog")
+            next_button = dialog.locator("button.share-box-footer__primary-btn")
+            await next_button.wait_for(state="visible")
+            await next_button.click()
+            await asyncio.sleep(wait_time)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("%s::%s",type(error), str(error))
+
+
+    async def insert_publication_text(self: Self, link: str, wait_time: int = 0):
+        try:
+            await self.page.get_by_role("textbox", name="Editor de texto para criação") \
+                .fill(f"🎵 Spotify:\n{link}")
+            await asyncio.sleep(wait_time)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("%s::%s",type(error), str(error))
+
+
+
+    async def click_schedule_post(self: Self, wait_time: int = 0):
+        try:
+            await self.page.get_by_role("button", name="Agendar publicação") \
+                .click()
+            await asyncio.sleep(wait_time)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("%s::%s",type(error), str(error))
+
+
+    async def insert_date(self: Self, date: str, wait_time: int = 0):
+        try:
+            await self.page.get_by_role("textbox", name="Date").press("ControlOrMeta+a")
+            await self.page.get_by_role("textbox", name="Date").fill(date)
+            await asyncio.sleep(wait_time)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("%s::%s",type(error), str(error))
+
+
+    async def insert_hour(self: Self, hour: str, wait_time: int = 0):
+        try:
+            await self.page.get_by_role("combobox", name="Time").press("ControlOrMeta+a")
+            await self.page.get_by_role("combobox", name="Time").fill(hour)
+            await asyncio.sleep(wait_time)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("%s::%s",type(error), str(error))
+
+
+    async def click_schedule_advance(self: Self, wait_time: int = 0):
+        try:
+            await self.page.get_by_role("button", name="Avançar").click()
+            await asyncio.sleep(wait_time)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("%s::%s",type(error), str(error))
+
+    async def click_schedule(self: Self, wait_time: int = 0):
+        try:
+            await self.page.get_by_role("button", name="Agendar", exact=True).click()
+            await asyncio.sleep(wait_time)
+        except Exception as error: # pylint: disable=broad-exception-caught
+            logging.error("%s::%s",type(error), str(error))
+
+
+
+#             <button aria-label="Avançar" id="ember140" class="share-box-footer__primary-btn artdeco-button artdeco-button--2 artdeco-button--primary ember-view" type="button"><!---->
+# <span class="artdeco-button__text">
+    
+#               Avançar
+          
+# </span></button>

@@ -1,12 +1,8 @@
 from typing import Self
 
-from src.utils.database.internal_getter import InternalGetter
+from src.utils.databases.internal_accessor import InternalAccessor
 
-
-class Internal(InternalGetter):
+class Internal(InternalAccessor):
 
     def __init__(self: Self) -> None:
         super().__init__()
-
-    def __del__(self: Self) -> None:
-        super().__del__()

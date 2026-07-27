@@ -4,7 +4,7 @@ class HtmlData(TypedDict):
     link_spotify: str
     edition_number: str
     music_title: str
-    muscic_artist: str
+    music_artist: str
     link_album: str
     situation_title: str
     situation: str
@@ -12,3 +12,5 @@ class HtmlData(TypedDict):
     curiosity: str
     question_title: str
     question: str
+    post_date: str
+    post_hour: str

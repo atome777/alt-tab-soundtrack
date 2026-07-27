@@ -17,7 +17,7 @@ async def html_generator(data: HtmlData) -> Path:
         .replace("{{SITUATION}}", data.get("situation"))
         .replace("{{LINK_ALBUM}}", data.get("link_album"))
         .replace("{{MUSIC_TITLE}}", data.get("music_title"))
-        .replace("{{MUSIC_ARTIST}}", data.get("muscic_artist"))
+        .replace("{{MUSIC_ARTIST}}", data.get("music_artist"))
         .replace("{{CURIOSITY_TITLE}}", data.get("curiosity_title"))
         .replace("{{CURIOSITY}}", data.get("curiosity"))
         .replace("{{QUESTION_TITLE}}", data.get("question_title"))
